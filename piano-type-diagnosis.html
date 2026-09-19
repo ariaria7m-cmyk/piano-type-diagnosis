@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ピアノ学習タイプ診断</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #2c3e50;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .quiz-screen,
+    .result-screen {
+      padding: 2rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #2c3e50;
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      color: #7f8c8d;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #ecf0f1;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #3498db;
+      transition: width 0.3s ease;
+    }
+
+    .question-number {
+      font-size: 12px;
+      color: #95a5a6;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .question-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
+
+    .option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      border: 1px solid #ecf0f1;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      color: #2c3e50;
+    }
+
+    .option-btn:hover {
+      background: #f8f9fa;
+      border-color: #3498db;
+    }
+
+    .option-btn.selected {
+      background: #ebf5fb;
+      border-color: #3498db;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: 1px solid #bdc3c7;
+      border-radius: 6px;
+      background: white;
+      color: #2c3e50;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #f8f9fa;
+      border-color: #3498db;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary-btn {
+      background: #3498db;
+      color: white;
+      border-color: #3498db;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      background: #2980b9;
+      border-color: #2980b9;
+    }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .result-emoji {
+      font-size: 40px;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-type-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #3498db;
+      margin-bottom: 1rem;
+    }
+
+    .type-intro {
+      background: #ebf5fb;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #2c3e50;
+      border-left: 4px solid #3498db;
+    }
+
+    .result-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .result-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #95a5a6;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .result-card {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ecf0f1;
+      font-size: 13px;
+      line-height: 1.8;
+      color: #2c3e50;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .reset-btn {
+      width: 100%;
+      margin-top: 0;
+    }
+
+    @media (max-width: 480px) {
+      .quiz-screen,
+      .result-screen {
+        padding: 1.5rem;
+      }
+
+      .header-title {
+        font-size: 16px;
+      }
+
+      .question-text {
+        font-size: 14px;
+      }
+
+      .option-btn {
+        font-size: 13px;
+        padding: 11px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="quiz-screen" id="quizScreen">
+      <div class="header">
+        <div class="header-title">🎹 ピアノ学習タイプ診断</div>
+        <div class="header-subtitle">あなたのタイプを知って、もっと楽しく上達しよう！</div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="question-number" id="questionNum"></div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options" id="optionsContainer"></div>
+
+      <div class="button-group">
+        <button id="prevBtn" onclick="previousQuestion()" style="display: none;">← 戻る</button>
+        <button class="primary-btn" id="nextBtn" onclick="nextQuestion()" disabled>次へ →</button>
+      </div>
+    </div>
+
+    <div class="result-screen hidden" id="resultScreen">
+      <div class="result-header">
+        <div class="result-emoji" id="resultEmoji"></div>
+        <div class="result-type-name" id="resultTypeName"></div>
+      </div>
+
+      <div class="type-intro" id="typeIntro"></div>
+
+      <div class="result-section">
+        <div class="result-section-title">ピアノ学習の強み</div>
+        <div class="result-card" id="strengths"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-section-title">指導法・練習法のコツ</div>
+        <div class="result-card" id="teachingTips"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-section-title">保護者からの声かけ</div>
+        <div class="result-card" id="parentalVoice"></div>
+      </div>
+
+      <div class="button-group">
+        <button class="primary-btn reset-btn" onclick="resetQuiz()">もう一度診断する</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "ピアノの練習で大切だと思うことは？",
+        options: [
+          { text: "完璧に弾くこと", type: 1 },
+          { text: "先生に認めてもらうこと", type: 2 },
+          { text: "上手になったと感じること", type: 3 }
+        ]
+      },
+      {
+        text: "得意なことをすぐに人に教えたくなりますか？",
+        options: [
+          { text: "いつもそう思う", type: 2 },
+          { text: "時々そう思う", type: 7 },
+          { text: "あまり思わない", type: 5 }
+        ]
+      },
+      {
+        text: "間違えたときの気持ちは？",
+        options: [
+          { text: "すぐに完璧に直したい", type: 1 },
+          { text: "なぜ間違えたか知りたい", type: 5 },
+          { text: "次はできるようになろう", type: 6 }
+        ]
+      },
+      {
+        text: "自分だけのユニークな表現をするのが好きですか？",
+        options: [
+          { text: "とても好き、自分らしく弾きたい", type: 4 },
+          { text: "好きだが、まずは基本をマスターしたい", type: 6 },
+          { text: "あまり考えない", type: 9 }
+        ]
+      },
+      {
+        text: "新しい曲に取り組むとき、最初にすることは？",
+        options: [
+          { text: "楽譜をよく読んで分析する", type: 5 },
+          { text: "先生の演奏を聞く", type: 2 },
+          { text: "さっそく弾いてみる", type: 7 }
+        ]
+      },
+      {
+        text: "練習がうまくいかないときは？",
+        options: [
+          { text: "何度も繰り返す", type: 1 },
+          { text: "先生に相談する", type: 6 },
+          { text: "別の方法を試してみる", type: 7 }
+        ]
+      },
+      {
+        text: "音楽を使ってやりたいことは？",
+        options: [
+          { text: "いろいろな曲を楽しく弾きたい", type: 7 },
+          { text: "人を感動させたい", type: 3 },
+          { text: "自分の気持ちを表現したい", type: 4 }
+        ]
+      },
+      {
+        text: "グループレッスンやコンクールで感じることは？",
+        options: [
+          { text: "リーダーになって引っ張りたい", type: 8 },
+          { text: "友達と一緒に楽しみたい", type: 9 },
+          { text: "目立つのは緊張する", type: 6 }
+        ]
+      },
+      {
+        text: "周りの友達と比べて思うことは？",
+        options: [
+          { text: "自分のペースでいい", type: 9 },
+          { text: "負けないようにがんばろう", type: 3 },
+          { text: "友達の上達を素直に喜べる", type: 2 }
+        ]
+      },
+      {
+        text: "モチベーションが下がったとき、何が助けになりますか？",
+        options: [
+          { text: "先生や親に褒めてもらう", type: 2 },
+          { text: "目標を設定する", type: 3 },
+          { text: "一人で考えて乗り越える", type: 5 }
+        ]
+      },
+      {
+        text: "間違いを見つけたときのあなたは？",
+        options: [
+          { text: "すぐに完璧に直したい", type: 1 },
+          { text: "どうしてそうなったか理解したい", type: 5 },
+          { text: "次の練習で気をつけようと思う", type: 9 }
+        ]
+      },
+      {
+        text: "新しい友達と練習するとき、どう接しますか？",
+        options: [
+          { text: "自分がリードする", type: 8 },
+          { text: "相手に合わせる", type: 9 },
+          { text: "協力して高め合う", type: 6 }
+        ]
+      },
+      {
+        text: "ピアノ以外でもやってみたいことがたくさんありますか？",
+        options: [
+          { text: "いろいろ試してみたい", type: 7 },
+          { text: "ピアノに集中したい", type: 1 },
+          { text: "バランスよくやりたい", type: 9 }
+        ]
+      },
+      {
+        text: "自分の弾き方について考えることは？",
+        options: [
+          { text: "自分らしさを大事にしたい", type: 4 },
+          { text: "正しい方法を学びたい", type: 6 },
+          { text: "人に認められたい", type: 3 }
+        ]
+      },
+      {
+        text: "新しい知識や奏法を知りたい気持ちは？",
+        options: [
+          { text: "深く理解したい", type: 5 },
+          { text: "実際に使ってみたい", type: 3 },
+          { text: "楽しければいい", type: 7 }
+        ]
+      }
+    ];
+
+    const typeProfiles = {
+      1: {
+        name: "完璧主義者",
+        emoji: "✨",
+        intro: "細かな工夫や完璧さを大切にするあなた。高い基準を持ち、自分に厳しく取り組むタイプです。",
+        strengths: "• 正確性と集中力が高い\n• 詳しく丁寧に練習できる\n• テクニック習得が堅実\n• 責任感を持って取り組める",
+        teachingTips: "• 小さな成功を具体的に褒める\n• 完璧さを求めすぎないよう声かけ\n• プロセスを褒める（結果だけでなく）\n• 難易度を段階的に上げる",
+        parentalVoice: "「細かいところに気をつけてるね、その姿勢がすごい」\n「完璧じゃなくても、がんばってる過程が大事だよ」\n「今日できたことを、また明日につなげようね」"
+      },
+      2: {
+        name: "優しい気配り派",
+        emoji: "💝",
+        intro: "人を大切にし、相手の気持ちを考えるあなた。人間関係を大事にし、グループでの活動を楽しむタイプです。",
+        strengths: "• 協調性が高い\n• 先生の指導をよく聞く\n• グループレッスンで活躍\n• 人の演奏から学べる",
+        teachingTips: "• 褒めて動機づけする\n• グループレッスンの機会を増やす\n• 先生との関係を大切にさせる\n• 音楽を通じた人とのつながりを強調",
+        parentalVoice: "「先生の話をちゃんと聞いてるのいいね」\n「お友達の演奏から学べるのって素敵」\n「あなたのやさしい気持ちが音に出てるよ」"
+      },
+      3: {
+        name: "目標達成派",
+        emoji: "🏆",
+        intro: "成長と達成を大事にするあなた。目標を立てて進むことが得意で、成果を実感したいタイプです。",
+        strengths: "• 目標設定が得意\n• モチベーション維持できる\n• 上達の実感を大切にする\n• チャレンジ精神がある",
+        teachingTips: "• 明確な小目標を設定する\n• 上達を可視化する（進度表など）\n• 定期的に達成を確認する\n• 次のステップを示す",
+        parentalVoice: "「この曲が弾けるようになったね、成長してるよ」\n「目標に向かって頑張ってるのがいい」\n「これができたら、次はこれにチャレンジしようか」"
+      },
+      4: {
+        name: "こだわり創作派",
+        emoji: "🎨",
+        intro: "自分らしさを大切にするあなた。独特の表現や創造性を大事にし、個性を活かしたいタイプです。",
+        strengths: "• 感性が豊か\n• 表現力がある\n• 自分らしい解釈ができる\n• 感情をこめて弾ける",
+        teachingTips: "• 基礎を学んだ後に表現の自由を与える\n• 個性を認め、伸ばす\n• 作曲やアレンジの機会を作る\n• 感性的なアプローチを重視",
+        parentalVoice: "「あなたらしい弾き方、いいね」\n「感情がこもった演奏だ」\n「基礎を学びながら、自分らしさも大切にしよう」"
+      },
+      5: {
+        name: "研究者派",
+        emoji: "🔬",
+        intro: "深く理解することを大切にするあなた。なぜ？という質問が多く、知識を深掘りするタイプです。",
+        strengths: "• 分析力が高い\n• 楽譜の構造が理解できる\n• 理論的に学べる\n• 一人で習得できる",
+        teachingTips: "• 理論的な説明をする\n• 楽譜の仕組みを教える\n• 自分で考える時間を与える\n• なぜ？に答える環境作り",
+        parentalVoice: "「しっかり理解しながら練習してるね」\n「そういう工夫、いいと思う」\n「わからないことを聞くのは、いい学び方だよ」"
+      },
+      6: {
+        name: "頑張り屋派",
+        emoji: "💪",
+        intro: "安定と信頼を大切にするあなた。コツコツ努力し、やり遂げる力が強いタイプです。",
+        strengths: "• 努力を続けられる\n• 信頼性がある\n• 安定した上達が可能\n• 責任感が強い",
+        teachingTips: "• 信頼関係を基盤にする\n• 明確な指導方針を示す\n• 不安を安心に変える\n• コツコツ進める喜びを伝える",
+        parentalVoice: "「毎日続けてるのが大事だね」\n「困ったときは相談していいんだよ」\n「あなたの努力は絶対に力になってるよ」"
+      },
+      7: {
+        name: "楽しい探求派",
+        emoji: "🎉",
+        intro: "楽しさと新しさを求めるあなた。いろいろな曲に挑戦し、音楽を楽しむことを大事にするタイプです。",
+        strengths: "• 学習意欲が高い\n• 新しい曲にすぐ挑戦できる\n• グループで盛り上げられる\n• 楽しさを感じやすい",
+        teachingTips: "• 多様な曲を用意する\n• ゲーム感覚の練習を取り入れる\n• 新しさを大切にする\n• 楽しさを優先させる",
+        parentalVoice: "「いろいろな曲に挑戦してるのいいね」\n「音楽を楽しんでる姿がいい」\n「細かいことより、楽しむことが大事だよ」"
+      },
+      8: {
+        name: "リーダーシップ派",
+        emoji: "👑",
+        intro: "影響力と自分らしさを求めるあなた。強い意志を持ち、リードするのが自然なタイプです。",
+        strengths: "• 主導性がある\n• 決断力が高い\n• グループをリードできる\n• 自信を持って弾ける",
+        teachingTips: "• 意見を聞く環境を作る\n• 自分でチャレンジさせる\n• リーダーの役割を与える\n• 自由度を尊重する",
+        parentalVoice: "「自分の考えを持ってるね」\n「リーダーシップがいいね」\n「人に教えるのもいいけど、基礎を大事にしようね」"
+      },
+      9: {
+        name: "調停者派",
+        emoji: "☮️",
+        intro: "調和と安定を大切にするあなた。周りとの関係を大事にし、ペースをコントロールするタイプです。",
+        strengths: "• バランス感覚がある\n• 協調性が高い\n• マイペースで上達できる\n• ストレスなく続けられる",
+        teachingTips: "• プレッシャーをかけない\n• 自分のペースを認める\n• 小さな成功を積み重ねる\n• 楽しさを中心にする",
+        parentalVoice: "「自分のペースでいいんだよ」\n「無理なく続けることが大事」\n「焦らなくても、着実に上達してるよ」"
+      }
+    };
+
+    let currentQuestion = 0;
+    let selectedAnswers = [];
+
+    function render() {
+      const q = questions[currentQuestion];
+      const progress = (currentQuestion / questions.length) * 100;
+
+      document.getElementById("progressFill").style.width = progress + "%";
+      document.getElementById("questionNum").textContent =
+        `質問 ${currentQuestion + 1} / ${questions.length}`;
+      document.getElementById("questionText").textContent = q.text;
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      q.options.forEach((option) => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        if (selectedAnswers[currentQuestion] === option.type) {
+          btn.classList.add("selected");
+        }
+        btn.textContent = option.text;
+        btn.onclick = () => selectOption(option.type);
+        container.appendChild(btn);
+      });
+
+      updateButtons();
+    }
+
+    function selectOption(typeNum) {
+      selectedAnswers[currentQuestion] = typeNum;
+      render();
+    }
+
+    function updateButtons() {
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+
+      prevBtn.style.display = currentQuestion === 0 ? "none" : "block";
+      nextBtn.disabled = selectedAnswers[currentQuestion] === undefined;
+      nextBtn.textContent =
+        currentQuestion === questions.length - 1 ? "診断結果を見る" : "次へ →";
+    }
+
+    function nextQuestion() {
+      if (selectedAnswers[currentQuestion] === undefined) return;
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        render();
+      } else {
+        showResults();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        render();
+      }
+    }
+
+    function showResults() {
+      const scores = {};
+      for (let i = 1; i <= 9; i++) scores[i] = 0;
+
+      selectedAnswers.forEach((type) => {
+        if (type) scores[type]++;
+      });
+
+      const resultType = Object.keys(scores).reduce((a, b) =>
+        scores[a] > scores[b] ? a : b
+      );
+      const profile = typeProfiles[resultType];
+
+      document.getElementById("resultEmoji").textContent = profile.emoji;
+      document.getElementById("resultTypeName").textContent = profile.name;
+      document.getElementById("typeIntro").textContent = profile.intro;
+      document.getElementById("strengths").textContent = profile.strengths;
+      document.getElementById("teachingTips").textContent = profile.teachingTips;
+      document.getElementById("parentalVoice").textContent = profile.parentalVoice;
+
+      document.getElementById("quizScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.remove("hidden");
+    }
+
+    function resetQuiz() {
+      currentQuestion = 0;
+      selectedAnswers = [];
+      document.getElementById("quizScreen").classList.remove("hidden");
+      document.getElementById("resultScreen").classList.add("hidden");
+      render();
+    }
+
+    render();
+  </script>
+</body>
+</html>
